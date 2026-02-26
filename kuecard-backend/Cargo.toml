@@ -1,0 +1,12 @@
+[package]
+name = "kuecard-backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+iced = { version = "0.14.0", features = ["image", "canvas", "svg", "wayland"] }
+image = "0.25.9"
+kutamun = "0.1.5"
+lru = "0.16.3"
+resvg = "0.47.0"
+vector-x = "0.1.3"
