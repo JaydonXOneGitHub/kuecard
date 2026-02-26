@@ -811,6 +811,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376"
 
 [[package]]
+name = "desktop-entry"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69a7adcb85589c79799f502efacc3b97c30fe4f8bb5663ce3fb4a576f79eb3a0"
+
+[[package]]
 name = "dispatch"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1815,6 +1821,7 @@ dependencies = [
 name = "kuecard-frontend"
 version = "0.1.0"
 dependencies = [
+ "desktop-entry",
  "iced",
  "image",
  "kuecard-backend",
