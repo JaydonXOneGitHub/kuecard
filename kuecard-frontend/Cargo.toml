@@ -4,8 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-desktop-entry = "0.3.0"
-iced = { version = "0.14.0", features = ["image", "canvas", "svg", "wayland"] }
+iced = { version = "0.14.0", features = ["image", "canvas", "svg", "wayland", "advanced"] }
 image = "0.25.9"
 kuecard-backend = { version = "0.1.0", path = "../kuecard-backend" }
 kutamun = "0.1.5"

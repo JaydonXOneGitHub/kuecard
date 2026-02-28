@@ -1,0 +1,10 @@
+pub const SPACING_AMOUNT: u32 = 20;
+pub const BUTTON_SIZE: u32 = 140;
+pub const CONTAINER_SPACING: f32 = 8.0;
+pub const UI_PADDING: f32 = 40.0;
+pub const MAX_ADDITIONAL_ROWS: usize = 2;
+pub const BLUR_RADIUS: f32 = 20.0;
+pub const ALLOWED_SCROLL_OFFSET: usize = 1;
+pub const GRID_MAIN: usize = 0;
+pub const MAX_IMAGE_COUNT: usize = 20;
+pub const BUTTON_AMOUNT: usize = 3;

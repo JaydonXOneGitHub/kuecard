@@ -8,11 +8,15 @@ use kuecard_backend::{
     message::Message
 };
 
-use crate::{callbacks::{
-    load_images_for_row, 
-    on_iced_event, 
-    on_nav_event
-}, custommessage::CustomMessage, helpers::MainApp};
+use crate::{
+    callbacks::{
+        load_images_for_row, 
+        on_iced_event, 
+        on_nav_event
+    }, 
+    custommessage::CustomMessage, 
+    helpers::MainApp
+};
 
 pub fn update(
     main_app: &mut MainApp, 

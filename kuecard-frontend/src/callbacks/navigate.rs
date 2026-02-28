@@ -10,7 +10,9 @@ use kuecard_backend::{
     elements::uibutton::UIButton
 };
 
-pub const GRID_MAIN: usize = 0;
+use crate::globals::GRID_MAIN;
+
+
 
 pub fn navigate(
     internal_grid: &InternalMultiGrid<UIButton>,

@@ -20,19 +20,12 @@ use kuecard_backend::{
     imagehandler::AtomicImageCache, 
     message::Message
 };
+use crate::globals::*;
 
 use crate::{custommessage::CustomMessage, helpers::{Either, MainApp}};
 
 pub type ButtonStyle = iced::widget::button::Style;
 pub type ContainerStyle = iced::widget::container::Style;
-
-pub const SPACING_AMOUNT: u32 = 20;
-pub const BUTTON_SIZE: u32 = 140;
-pub const CONTAINER_SPACING: f32 = 8.0;
-pub const UI_PADDING: f32 = 40.0;
-pub const MAX_ADDITIONAL_ROWS: usize = 2;
-pub const BLUR_RADIUS: f32 = 20.0;
-pub const ALLOWED_SCROLL_OFFSET: usize = 1;
 
 fn custom_min<T: Sized + Ord>(one: T, two: T) -> Either<T, T> {
     return if one < two {
@@ -48,7 +41,7 @@ fn row_is_unviewable(
     grid_height: usize,
     grid_pos: &Vector2<usize>
 ) -> bool {
-    let max_scroll_value: usize = grid_height - MAX_ADDITIONAL_ROWS - 1;
+    let max_scroll_value: usize = grid_height.saturating_sub(MAX_ADDITIONAL_ROWS - 1);
     let min: Either<usize, usize> = custom_min(
         r, max_scroll_value
     );

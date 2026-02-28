@@ -3,10 +3,7 @@ use vector_x::Vector2;
 
 use crate::{
     elements::uibutton::UIButton, 
-    imagehandler::{
-        AtomicImageCache, 
-        MAX_IMAGE_COUNT
-    }
+    imagehandler::AtomicImageCache,
 };
 
 pub struct App {
@@ -20,7 +17,7 @@ impl Default for App {
     fn default() -> Self {
         return Self::make(
             || MultiGrid::new(),
-            || AtomicImageCache::new(MAX_IMAGE_COUNT)
+            || AtomicImageCache::new(10)
         );
     }
 }

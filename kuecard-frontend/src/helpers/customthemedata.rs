@@ -1,10 +1,16 @@
 use iced::{Color, Shadow, Vector, gradient::Linear};
 use serde::{Deserialize, Serialize};
 
-use crate::{callbacks::{
-    BLUR_RADIUS, 
-    CONTAINER_SPACING
-}, helpers::{Backdrop, CustomTheme}};
+use crate::{
+    globals::{
+        BLUR_RADIUS, 
+        CONTAINER_SPACING
+    }, 
+    helpers::{
+        Backdrop, 
+        CustomTheme
+    }
+};
 
 
 

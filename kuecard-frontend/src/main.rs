@@ -11,6 +11,7 @@ mod callbacks;
 mod traits;
 mod helpers;
 mod custommessage;
+mod globals;
 
 
 

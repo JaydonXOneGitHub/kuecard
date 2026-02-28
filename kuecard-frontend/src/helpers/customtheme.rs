@@ -1,6 +1,6 @@
 use iced::{Color, Shadow, Vector};
 
-use crate::{callbacks::{BLUR_RADIUS, CONTAINER_SPACING}, helpers::Backdrop};
+use crate::{globals::{BLUR_RADIUS, CONTAINER_SPACING}, helpers::Backdrop};
 
 #[derive(Clone)]
 pub struct CustomTheme {

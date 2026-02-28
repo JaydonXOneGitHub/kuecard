@@ -4,8 +4,6 @@ use lru::LruCache;
 
 pub type ImageHandle = iced::widget::image::Handle;
 
-pub const MAX_IMAGE_COUNT: usize = 20;
-
 pub struct ImageCache {
     lru_cache: LruCache<String, ImageHandle>,
     main_cache: HashMap<String, ImageHandle>,
