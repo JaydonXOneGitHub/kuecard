@@ -1,40 +1,27 @@
 use std::path::Path;
 
-use iced::{
-    Color, 
-    Task
-};
-use kutamun::{
-    Grid, 
-    GridState, 
-    MultiGrid
-};
+use iced::Task;
+use kutamun::{Grid, GridState, MultiGrid};
 use vector_x::Vector2;
 
 use kuecard_backend::{
-    abstractions::{
-        App, 
-        ImageLoadList
-    },  
-    elements::uibutton::{
-        TextTile, 
-        UIButton
-    }, 
+    abstractions::{App, ImageLoadList},
+    elements::uibutton::UIButton,
     imagehandler::AtomicImageCache,
-    message::Message
+    message::Message,
 };
 
 use crate::{
-    custommessage::CustomMessage, globals::{BUTTON_AMOUNT, GRID_MAIN, MAX_IMAGE_COUNT}, helpers::{
-        AppTileData, Config, CustomThemeData, MainApp
-    }
+    custommessage::CustomMessage,
+    globals::{BUTTON_AMOUNT, GRID_MAIN, MAX_IMAGE_COUNT},
+    helpers::{AppTileData, Config, CustomThemeData, MainApp},
 };
 
 fn read_theme<'a>(path: impl Into<Option<&'a str>>) -> CustomThemeData {
     let str: Option<&str> = path.into();
     let path: &Path = Path::new(match str {
         Option::Some(s) => s,
-        Option::None => "theme.json"
+        Option::None => "theme.json",
     });
 
     let res = std::fs::read(path);
@@ -64,7 +51,7 @@ fn read_config<'a>(path: impl Into<Option<&'a str>>) -> Config {
     let str: Option<&str> = path.into();
     let path: &Path = Path::new(match str {
         Option::Some(s) => s,
-        Option::None => "config.json"
+        Option::None => "config.json",
     });
 
     let res = std::fs::read(path);
@@ -109,12 +96,10 @@ fn get_app_data_list(dir: &Path) -> Vec<Vec<AppTileData>> {
             app_data_full_list.push(app_data_list.clone());
             app_data_list.clear();
         }
-        
+
         let entry = file.unwrap();
 
-        let contents = String::from_utf8(
-            std::fs::read(entry.path()).unwrap()
-        ).unwrap();
+        let contents = String::from_utf8(std::fs::read(entry.path()).unwrap()).unwrap();
 
         println!("Contents: {}", contents);
 
@@ -179,37 +164,9 @@ fn get_multi_grid(path: &str, alt_path: &str) -> MultiGrid<UIButton> {
     .with_position(Vector2::new(0, 0))
     .with_enabled(GridState::Visible);
 
-    let grid2: Grid<UIButton> = Grid::from_callback(
-        || {
-            return vec![
-                vec![
-                    UIButton::TextTile(TextTile {
-                        text: String::from("One"),
-                        color: Color::from_rgba(1.0, 0.2, 1.0, 1.0)
-                    }),
-                    UIButton::TextTile(TextTile {
-                        text: String::from("Two"),
-                        color: Color::from_rgba(1.0, 0.2, 1.0, 1.0)
-                    }),
-                    UIButton::TextTile(TextTile {
-                        text: String::from("Three"),
-                        color: Color::from_rgba(1.0, 0.2, 1.0, 1.0)
-                    }),
-                    UIButton::TextTile(TextTile {
-                        text: String::from("Four"),
-                        color: Color::from_rgba(1.0, 0.2, 1.0, 1.0)
-                    }),
-                ]
-            ];
-        }
-    )
-    .with_position(Vector2::new(0, 0))
-    .with_enabled(GridState::Visible);
-    
     return MultiGrid::new()
-    .with_grid((GRID_MAIN, grid))
-    .with_grid((1, grid2))
-    .with_selected_grid(0);
+        .with_grid((GRID_MAIN, grid))
+        .with_selected_grid(0);
 }
 
 fn get_image_handler() -> AtomicImageCache {
@@ -222,22 +179,16 @@ pub fn initialize() -> (MainApp, Task<Message<CustomMessage>>) {
     let config: Config = read_config("config.json");
     //let aic2: AtomicImageCache = aic.clone();
 
-    let mg: MultiGrid<UIButton> = get_multi_grid(
-        &config.app_dir,
-        &config.backup_app_dir
-    );
+    let mg: MultiGrid<UIButton> = get_multi_grid(&config.app_dir, &config.backup_app_dir);
 
-    let app: App = App::make(
-        || mg.clone(),
-        || aic
-    );
+    let app: App = App::make(|| mg.clone(), || aic);
 
     let theme_data: CustomThemeData = read_theme(Option::None);
 
-    let main_app: MainApp = MainApp { 
-        app, 
+    let main_app: MainApp = MainApp {
+        app,
         theme: theme_data.into(),
-        config: config
+        config: config,
     };
 
     let task: Task<Message<CustomMessage>> = load_images(mg.clone());
@@ -268,20 +219,15 @@ fn load_images(mg: MultiGrid<UIButton>) -> Task<Message<CustomMessage>> {
 
     for row in grid.get_buttons() {
         for button in row {
-            vec_str.push(
-                button.app_button()
-                .unwrap()
-                .img_path
-                .clone()
-            );
+            vec_str.push(button.app_button().unwrap().img_path.clone());
         }
     }
 
     let task: Task<Message<CustomMessage>> = Task::perform(
-            async move {
+        async move {
             return ImageLoadList::new(vec_str);
-        }, 
-        Message::LoadImageSet
+        },
+        Message::LoadImageSet,
     );
 
     return task;
