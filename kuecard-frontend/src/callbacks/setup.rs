@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{fs::DirEntry, path::Path};
 
 use iced::Task;
 use kutamun::{Grid, GridState, MultiGrid};
@@ -97,13 +97,13 @@ fn get_app_data_list(dir: &Path) -> Vec<Vec<AppTileData>> {
             app_data_list.clear();
         }
 
-        let entry = file.unwrap();
+        let entry: DirEntry = file.unwrap();
 
-        let contents = String::from_utf8(std::fs::read(entry.path()).unwrap()).unwrap();
+        let contents: String = String::from_utf8(std::fs::read(entry.path()).unwrap()).unwrap();
 
         println!("Contents: {}", contents);
 
-        let res = serde_json::from_str(&contents);
+        let res: Result<AppTileData, serde_json::Error> = serde_json::from_str(&contents);
 
         if res.is_err() {
             println!("Error: {}", res.err().unwrap());
@@ -189,6 +189,7 @@ pub fn initialize() -> (MainApp, Task<Message<CustomMessage>>) {
         app,
         theme: theme_data.into(),
         config: config,
+        scale_factor: 1.0,
     };
 
     let task: Task<Message<CustomMessage>> = load_images(mg.clone());

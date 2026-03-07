@@ -1,28 +1,24 @@
-use std::{cell::{RefCell, RefMut}, rc::Rc};
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
 
 use iced::{
-    Border, 
-    Element, 
-    widget::{
-        Button, Column, Container, Image, Row, Space, Stack, Text
-    }
+    Border, Element,
+    widget::{Button, Column, Container, Image, Row, Space, Stack, Svg, Text},
 };
-use kutamun::{
-    Grid, 
-    multigrids::InternalMultiGrid
-};
+use kutamun::{Grid, multigrids::InternalMultiGrid};
 use vector_x::Vector2;
 
-use kuecard_backend::{
-    elements::{
-        uibutton::UIButton
-    }, 
-    imagehandler::AtomicImageCache, 
-    message::Message
-};
 use crate::globals::*;
+use kuecard_backend::{
+    elements::uibutton::UIButton, imagehandler::AtomicImageCache, message::Message,
+};
 
-use crate::{custommessage::CustomMessage, helpers::{Either, MainApp}};
+use crate::{
+    custommessage::CustomMessage,
+    helpers::{Either, MainApp},
+};
 
 pub type ButtonStyle = iced::widget::button::Style;
 pub type ContainerStyle = iced::widget::container::Style;
@@ -36,30 +32,19 @@ fn custom_min<T: Sized + Ord>(one: T, two: T) -> Either<T, T> {
 }
 
 #[allow(unused_parens)]
-fn row_is_unviewable(
-    r: usize, 
-    grid_height: usize,
-    grid_pos: &Vector2<usize>
-) -> bool {
+fn row_is_unviewable(r: usize, grid_height: usize, grid_pos: &Vector2<usize>) -> bool {
     let max_scroll_value: usize = grid_height.saturating_sub(MAX_ADDITIONAL_ROWS - 1);
-    let min: Either<usize, usize> = custom_min(
-        r, max_scroll_value
-    );
+    let min: Either<usize, usize> = custom_min(r, max_scroll_value);
 
     let capped_r: usize = match min {
         Either::A(a) => a,
         Either::B(b) => b,
-        Either::Neither => 0
+        Either::Neither => 0,
     };
 
     return if min.is_a() {
-        (
-            (capped_r < grid_pos.one.saturating_sub(
-                ALLOWED_SCROLL_OFFSET
-            )) || 
-            (capped_r > grid_pos.one + 
-            MAX_ADDITIONAL_ROWS + ALLOWED_SCROLL_OFFSET)
-        )
+        ((capped_r < grid_pos.one.saturating_sub(ALLOWED_SCROLL_OFFSET))
+            || (capped_r > grid_pos.one + MAX_ADDITIONAL_ROWS + ALLOWED_SCROLL_OFFSET))
     } else {
         r < max_scroll_value
     };
@@ -68,7 +53,7 @@ fn row_is_unviewable(
 fn get_buttons<'a>(
     main_app: &'a MainApp,
     mg_handle: &Rc<RefCell<InternalMultiGrid<UIButton>>>,
-    image_cache: &AtomicImageCache
+    image_cache: &AtomicImageCache,
 ) -> Element<'a, Message<CustomMessage>> {
     let res = mg_handle.try_borrow_mut();
 
@@ -79,9 +64,7 @@ fn get_buttons<'a>(
 
     let mg: RefMut<'_, InternalMultiGrid<UIButton>> = res.unwrap();
 
-    let opt: Option<&Grid<UIButton>> = mg.get_grids().get(
-        &mg.get_current_grid().unwrap()
-    );
+    let opt: Option<&Grid<UIButton>> = mg.get_grids().get(&mg.get_current_grid().unwrap());
 
     if opt.is_none() {
         return Space::new().into();
@@ -99,25 +82,17 @@ fn get_buttons<'a>(
         if row_is_unviewable(r, buttons.len(), &grid_pos) {
             continue;
         }
-        
+
         let mut button_row: Row<'_, Message<CustomMessage>> = Row::new();
 
         for (b, button) in row.iter().enumerate() {
-            button_row = create_button(
-                main_app,
-                button_row, 
-                (r, b),
-                grid, 
-                button, 
-                image_cache
-            )
-            .push(Space::new().width(SPACING_AMOUNT));
+            button_row = create_button(main_app, button_row, (r, b), grid, button, image_cache)
+                .push(Space::new().width(SPACING_AMOUNT));
         }
 
         column = column
-        .push(button_row)
-        .push(Space::new()
-        .height(SPACING_AMOUNT));
+            .push(button_row)
+            .push(Space::new().height(SPACING_AMOUNT));
     }
 
     return column.into();
@@ -129,72 +104,65 @@ fn create_button<'a>(
     position: (usize, usize),
     grid: &Grid<UIButton>,
     button: &UIButton,
-    image_cache: &AtomicImageCache
+    image_cache: &AtomicImageCache,
 ) -> Row<'a, Message<CustomMessage>> {
     let element: Element<'a, Message<CustomMessage>> = match button {
         UIButton::AppTile(app_tile) => {
             let res = image_cache.get_image_cache().try_lock();
 
             let internal_element: Element<'a, Message<CustomMessage>> = match res {
-                Result::Ok(mut ic) => {
-                    match ic.get_main_cache_mut().get(&app_tile.img_path) {
-                        Option::Some(img) => {
-                            Image::new(img.clone())
-                            .width(BUTTON_SIZE * 2)
-                            .height(BUTTON_SIZE * 2)
-                            .into()
-                        },
-                        Option::None => {
-                            let text: String = app_tile.alt_text.clone();
-                            Text::new(text).into()
-                        }
+                Result::Ok(mut ic) => match ic.get_main_cache_mut().get(&app_tile.img_path) {
+                    Option::Some(img) => Svg::new(img.clone())
+                        .width(BUTTON_SIZE * 2)
+                        .height(BUTTON_SIZE * 2)
+                        .into(),
+                    Option::None => {
+                        let text: String = app_tile.alt_text.clone();
+                        Text::new(text).into()
                     }
                 },
-                Result::Err(_) => Space::new().into()
+                Result::Err(_) => Space::new().into(),
             };
 
             let button = Button::new(internal_element)
-            .width(BUTTON_SIZE)
-            .height(BUTTON_SIZE)
-            .style(move |_, _| -> ButtonStyle {
-                return ButtonStyle {
-                    text_color: main_app.theme.text_color.clone(),
-                    background: Option::Some(
-                        main_app.theme.button_backdrop.to_background()
-                    ),
-                    shadow: main_app.theme.shadow.clone(),
-                    ..Default::default()
-                };
-            });
+                .width(BUTTON_SIZE)
+                .height(BUTTON_SIZE)
+                .style(move |_, _| -> ButtonStyle {
+                    return ButtonStyle {
+                        text_color: main_app.theme.text_color.clone(),
+                        background: Option::Some(main_app.theme.button_backdrop.to_background()),
+                        shadow: main_app.theme.shadow.clone(),
+                        ..Default::default()
+                    };
+                });
 
             let pos: Vector2<usize> = grid.get_position();
             let current_pos: (usize, usize) = position.clone();
 
             let container = Container::new(button)
-            .width(BUTTON_SIZE)
-            .height(BUTTON_SIZE)
-            .padding(CONTAINER_SPACING)
-            .style(move |_| -> ContainerStyle {
-                let current_pos: Vector2<usize> = current_pos.into();
-                let border = if pos == current_pos {
-                    Border::default()
-                    .color(main_app.theme.selected_color.clone())
-                    .rounded(CONTAINER_SPACING)
-                    .width(CONTAINER_SPACING)
-                } else {
-                    Border::default()
-                    .color(main_app.theme.unselected_color.clone())
-                    .rounded(CONTAINER_SPACING)
-                    .width(CONTAINER_SPACING)
-                };
+                .width(BUTTON_SIZE)
+                .height(BUTTON_SIZE)
+                .padding(CONTAINER_SPACING)
+                .style(move |_| -> ContainerStyle {
+                    let current_pos: Vector2<usize> = current_pos.into();
+                    let border = if pos == current_pos {
+                        Border::default()
+                            .color(main_app.theme.selected_color.clone())
+                            .rounded(CONTAINER_SPACING)
+                            .width(CONTAINER_SPACING)
+                    } else {
+                        Border::default()
+                            .color(main_app.theme.unselected_color.clone())
+                            .rounded(CONTAINER_SPACING)
+                            .width(CONTAINER_SPACING)
+                    };
 
-                return ContainerStyle::default()
-                .border(border);
-            });
+                    return ContainerStyle::default().border(border);
+                });
 
             container.into()
-        },
-        _ => Space::new().into()
+        }
+        _ => Space::new().into(),
     };
 
     return button_row.push(element);
@@ -203,39 +171,32 @@ fn create_button<'a>(
 pub fn view(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
     //return Space::new().into();
 
-    let mg_handle: &Rc<RefCell<InternalMultiGrid<UIButton>>> = main_app.app
-    .get_multi_grid()
-    .get_internal_ref();
+    let mg_handle: &Rc<RefCell<InternalMultiGrid<UIButton>>> =
+        main_app.app.get_multi_grid().get_internal_ref();
 
-    let button_layout: Element<'_, Message<CustomMessage>> = get_buttons(
-        main_app,
-        mg_handle, 
-        main_app.app.get_image_cache()
-    );
+    let button_layout: Element<'_, Message<CustomMessage>> =
+        get_buttons(main_app, mg_handle, main_app.app.get_image_cache());
 
     let main_elements: Element<'_, Message<CustomMessage>> = Container::new(
-        Row::new()
-        .push(Column::new()
-            .push(Space::new().width(450))
-            .push(button_layout)
-        )
+        Row::new().push(
+            Column::new()
+                .push(Space::new().width(450))
+                .push(button_layout),
+        ),
     )
     .padding(UI_PADDING)
     .into();
 
     let bg: Element<'_, Message<CustomMessage>> = Container::new(Space::new())
-    .width(1280)
-    .height(720)
-    .style(|_| -> ContainerStyle {
-        return ContainerStyle {
-            background: Option::Some(main_app.theme.backdrop.to_background()),
-            ..Default::default()
-        };
-    })
-    .into();
+        .width(1280)
+        .height(720)
+        .style(|_| -> ContainerStyle {
+            return ContainerStyle {
+                background: Option::Some(main_app.theme.backdrop.to_background()),
+                ..Default::default()
+            };
+        })
+        .into();
 
-    return Stack::new()
-    .push(bg)
-    .push(main_elements)
-    .into();
+    return Stack::new().push(bg).push(main_elements).into();
 }

@@ -1,18 +1,22 @@
-use std::cell::BorrowMutError;
+use std::{
+    cell::BorrowMutError,
+    process::{Child, Command},
+};
 
 use iced::{
     Task,
     keyboard::key::{Code, Physical},
 };
-use kutamun::Direction;
+use kutamun::{Direction, Grid};
 use vector_x::{Vector2, Vector3};
 
 use kuecard_backend::{
     abstractions::App,
+    elements::uibutton::UIButton,
     message::{Message, NavEvent},
 };
 
-use crate::{callbacks::navigate, custommessage::CustomMessage};
+use crate::{callbacks::navigate, custommessage::CustomMessage, helpers::MainApp};
 
 fn on_iced_keyboard_event(
     _app: &mut App,
@@ -96,7 +100,48 @@ pub fn on_nav_event(_app: &mut App, ne: NavEvent) -> Task<Message<CustomMessage>
 
             return Task::none();
         }
-        NavEvent::Select(_) => {
+        NavEvent::Select(pos) => {
+            let res = _app.get_multi_grid().get_internal_ref().try_borrow();
+
+            if res.is_err() {
+                return Task::perform(
+                    tokio::time::sleep(tokio::time::Duration::from_millis(400)),
+                    |_| return Message::NavEvent(ne),
+                );
+            }
+
+            let multi_grid = res.ok().unwrap();
+
+            let opt: Option<&Grid<UIButton>> = multi_grid.get_grids().get(&pos.one);
+
+            if opt.is_none() {
+                return Task::none();
+            }
+
+            let grid: &Grid<UIButton> = opt.unwrap();
+
+            let button: &UIButton = grid
+                .get_buttons()
+                .get(pos.two)
+                .unwrap()
+                .get(pos.three)
+                .unwrap();
+
+            match button {
+                UIButton::AppTile(app_tile) => {
+                    let mut command: Command = Command::new(app_tile.command.clone());
+
+                    let res = command.spawn();
+
+                    return if res.is_err() {
+                        Task::none()
+                    } else {
+                        Task::done(Message::Custom(CustomMessage::Exit))
+                    };
+                }
+                _ => {}
+            }
+
             return Task::none();
         }
         NavEvent::Back => {
@@ -106,4 +151,16 @@ pub fn on_nav_event(_app: &mut App, ne: NavEvent) -> Task<Message<CustomMessage>
             return Task::none();
         }
     }
+}
+
+pub fn on_custom_event(main_app: &mut MainApp, cm: CustomMessage) -> Task<Message<CustomMessage>> {
+    return match cm {
+        CustomMessage::ThemeChanged(theme) => {
+            main_app.theme = theme;
+
+            Task::none()
+        }
+        CustomMessage::Exit => iced::exit(),
+        _ => Task::none(),
+    };
 }
