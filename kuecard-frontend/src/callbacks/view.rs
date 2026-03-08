@@ -4,15 +4,14 @@ use std::{
 };
 
 use iced::{
-    Border, Element,
-    widget::{Button, Column, Container, Image, Row, Space, Stack, Svg, Text},
+    Border, Element, advanced::graphics::core::Bytes, widget::{Button, Column, Container, Image, Row, Space, Stack, Svg, Text}
 };
 use kutamun::{Grid, multigrids::InternalMultiGrid};
 use vector_x::Vector2;
 
-use crate::globals::*;
+use crate::{globals::*, helpers::{AdImage, AdMetadata}};
 use kuecard_backend::{
-    elements::uibutton::UIButton, imagehandler::AtomicImageCache, message::Message,
+    elements::uibutton::UIButton, imagehandler::{AtomicImageCache, ImageHandle}, message::Message,
 };
 
 use crate::{
@@ -168,6 +167,25 @@ fn create_button<'a>(
     return button_row.push(element);
 }
 
+fn ad_image(ad_image: &AdImage) -> Element<'_, Message<CustomMessage>> {
+    return match &ad_image.handle {
+        Option::Some(handle) => Image::new(handle.clone()).width(ad_image.width).height(ad_image.height).into(),
+        Option::None => Space::new().into()
+    };
+}
+
+fn ad_widget(ad_metadata: &Option<AdMetadata>) -> Element<'_, Message<CustomMessage>> {
+    return match ad_metadata {
+        Option::None => Space::new().into(),
+        Option::Some(metadata) => Row::new()
+            .push(Space::new().width(AD_SPACING))
+            .push(Column::new()
+                .push(ad_image(&metadata.ad_image))
+                .push(Text::new(metadata.content.clone())))
+            .into()
+    };
+}
+
 pub fn view(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
     //return Space::new().into();
 
@@ -178,11 +196,9 @@ pub fn view(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
         get_buttons(main_app, mg_handle, main_app.app.get_image_cache());
 
     let main_elements: Element<'_, Message<CustomMessage>> = Container::new(
-        Row::new().push(
-            Column::new()
-                .push(Space::new().width(450))
-                .push(button_layout),
-        ),
+        Row::new()
+        .push(Column::new().push(Space::new().width(450)).push(button_layout))
+        .push(ad_widget(&main_app.ad_metadata)),
     )
     .padding(UI_PADDING)
     .into();

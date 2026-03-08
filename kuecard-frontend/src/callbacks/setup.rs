@@ -12,9 +12,7 @@ use kuecard_backend::{
 };
 
 use crate::{
-    custommessage::CustomMessage,
-    globals::{BUTTON_AMOUNT, GRID_MAIN, MAX_IMAGE_COUNT},
-    helpers::{AppTileData, Config, CustomThemeData, MainApp},
+    custommessage::CustomMessage, globals::{BUTTON_AMOUNT, GRID_MAIN, MAX_IMAGE_COUNT}, helpers::{AppTileData, Config, CustomThemeData, MainApp}
 };
 
 fn read_theme<'a>(path: impl Into<Option<&'a str>>) -> CustomThemeData {
@@ -190,6 +188,7 @@ pub fn initialize() -> (MainApp, Task<Message<CustomMessage>>) {
         theme: theme_data.into(),
         config: config,
         scale_factor: 1.0,
+        ad_metadata: Option::None,
     };
 
     let task: Task<Message<CustomMessage>> = load_images(mg.clone());
@@ -230,6 +229,13 @@ fn load_images(mg: MultiGrid<UIButton>) -> Task<Message<CustomMessage>> {
         },
         Message::LoadImageSet,
     );
+
+    // let msg: Message<CustomMessage> = Message::LoadImageSet(ImageLoadList::new(vec_str));
+
+    // let task: Task<Message<CustomMessage>> = Task::done(Message::Custom(CustomMessage::Delay {
+    //     time_in_milliseconds: 2000,
+    //     message: Box::new(msg),
+    // }));
 
     return task;
 }

@@ -8,3 +8,6 @@ pub const ALLOWED_SCROLL_OFFSET: usize = 1;
 pub const GRID_MAIN: usize = 0;
 pub const MAX_IMAGE_COUNT: usize = 20;
 pub const BUTTON_AMOUNT: usize = 3;
+pub const AD_URL: &str = "http://localhost:8080/ad-network";
+pub const AD_REFRESH_INTERVAL_SECONDS: usize = 20;
+pub const AD_SPACING: u32 = 300;

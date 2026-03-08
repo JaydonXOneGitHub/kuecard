@@ -4,9 +4,13 @@ pub use crate::helpers::config::*;
 pub use crate::helpers::customtheme::*;
 pub use crate::helpers::customthemedata::*;
 //pub use crate::helpers::desktopentry::*;
+pub use crate::helpers::adimage::*;
+pub use crate::helpers::admetadata::*;
 pub use crate::helpers::either::*;
 pub use crate::helpers::mainapp::*;
 
+pub mod adimage;
+pub mod admetadata;
 pub mod apptiledata;
 pub mod background;
 pub mod config;

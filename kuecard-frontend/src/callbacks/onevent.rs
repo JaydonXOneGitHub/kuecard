@@ -1,7 +1,4 @@
-use std::{
-    cell::BorrowMutError,
-    process::{Child, Command},
-};
+use std::{cell::BorrowMutError, process::Command, time::Duration};
 
 use iced::{
     Task,
@@ -160,7 +157,27 @@ pub fn on_custom_event(main_app: &mut MainApp, cm: CustomMessage) -> Task<Messag
 
             Task::none()
         }
+        CustomMessage::AdLoaded(Result::Ok(ad_metadata)) => {
+            main_app.ad_metadata = Option::Some(ad_metadata);
+            Task::none()
+        }
+        CustomMessage::AdLoaded(Result::Err(err)) => Task::done(Message::PrintErr(err)),
         CustomMessage::Exit => iced::exit(),
+        CustomMessage::Delay {
+            time_in_milliseconds,
+            message,
+        } => {
+            let time: u64 = time_in_milliseconds.clone();
+
+            let msg: Message<CustomMessage> = message.as_ref().clone();
+
+            Task::perform(
+                async move {
+                    tokio::time::sleep(Duration::from_millis(time)).await;
+                },
+                move |_| msg,
+            )
+        }
         _ => Task::none(),
     };
 }
