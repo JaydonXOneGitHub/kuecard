@@ -14,7 +14,7 @@
     },
     "angle": 12.25
   },
-  "button_backdrop": {
+  "buttonBackdrop": {
     "start": {
       "r": 0.0,
       "g": 0.0,
@@ -29,19 +29,25 @@
     },
     "angle": 45.0
   },
-  "text_color": {
+  "textColor": {
     "r": 1.0,
     "g": 1.0,
     "b": 1.0,
     "a": 1.0
   },
-  "unselected_color": {
+  "sponsoredTextColor": {
+    "r": 1.0,
+    "g": 1.0,
+    "b": 1.0,
+    "a": 1.0
+  },
+  "unselectedColor": {
     "r": 0.1,
     "g": 0.1,
     "b": 0.2,
     "a": 1.0
   },
-  "selected_color": {
+  "selectedColor": {
     "r": 1.0,
     "g": 1.0,
     "b": 1.0,
@@ -58,6 +64,6 @@
       0.0,
       0.0
     ],
-    "blur_radius": 32.0
+    "blurRadius": 32.0
   }
 }

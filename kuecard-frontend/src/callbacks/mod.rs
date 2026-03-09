@@ -6,6 +6,7 @@ pub use crate::callbacks::scalefactor::*;
 pub use crate::callbacks::subscription::*;
 pub use crate::callbacks::update::*;
 pub use crate::callbacks::view::*;
+pub use crate::callbacks::audiosubsystem::*;
 
 pub mod adnetwork;
 pub mod asynccallbacks;
@@ -16,3 +17,4 @@ pub mod setup;
 pub mod subscription;
 pub mod update;
 pub mod view;
+pub mod audiosubsystem;

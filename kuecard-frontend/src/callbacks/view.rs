@@ -4,7 +4,7 @@ use std::{
 };
 
 use iced::{
-    Border, Element, advanced::graphics::core::Bytes, widget::{Button, Column, Container, Image, Row, Space, Stack, Svg, Text}
+    Background, Border, Color, Element, Font, Length, advanced::graphics::core::Bytes, widget::{Button, Column, Container, Image, Row, Space, Stack, Svg, Text}
 };
 use kutamun::{Grid, multigrids::InternalMultiGrid};
 use vector_x::Vector2;
@@ -167,23 +167,83 @@ fn create_button<'a>(
     return button_row.push(element);
 }
 
-fn ad_image(ad_image: &AdImage) -> Element<'_, Message<CustomMessage>> {
-    return match &ad_image.handle {
-        Option::Some(handle) => Image::new(handle.clone()).width(ad_image.width).height(ad_image.height).into(),
+fn ad_image(ad_image: &AdImage) -> impl Into<Element<'_, Message<CustomMessage>>> {
+    let image: Element<'_, Message<CustomMessage>> = match &ad_image.handle {
+        Option::Some(handle) => Image::new(handle.clone()).width(AD_WIDTH).height(AD_HEIGHT).into(),
         Option::None => Space::new().into()
     };
+    let container: Container<Message<CustomMessage>> = Container::new(image)
+        .center(Length::Fill)
+        .width(AD_WIDTH)
+        .height(AD_HEIGHT)
+        .style(|_| -> ContainerStyle {
+            return ContainerStyle {
+                background: Option::Some(Background::Color(Color::BLACK)),
+                ..Default::default()
+            };
+        });
+    return container;
 }
 
-fn ad_widget(ad_metadata: &Option<AdMetadata>) -> Element<'_, Message<CustomMessage>> {
-    return match ad_metadata {
-        Option::None => Space::new().into(),
-        Option::Some(metadata) => Row::new()
-            .push(Space::new().width(AD_SPACING))
-            .push(Column::new()
-                .push(ad_image(&metadata.ad_image))
-                .push(Text::new(metadata.content.clone())))
-            .into()
+fn make_ad_widget<'a>(main_app: &'a MainApp, metadata: &'a AdMetadata) -> Element<'a, Message<CustomMessage>> {
+    let mut font: Font = match &FONT_OVERRIDE {
+        Option::Some(font_name) => Font::with_name(font_name),
+        Option::None => Font::with_name("Noto Sans")
     };
+
+    //font.weight = iced::font::Weight::ExtraBold;
+    font.stretch = iced::font::Stretch::Expanded;
+
+    let sponsored_text: Text = Text::new("(i) SPONSORED")
+        .width(AD_WIDTH)
+        .center()
+        .color(match &main_app.theme.sponsored_text_color {
+            Option::Some(spons) => spons.clone(),
+            Option::None => main_app.theme.text_color.clone()
+        })
+        .font(font.clone())
+        .size(main_app.theme.font_size);
+
+    let content_text: Text = Text::new(metadata.content.clone())
+        .width(AD_WIDTH)
+        .center()
+        .color(match &main_app.theme.sponsored_text_color {
+            Option::Some(spons) => spons.clone(),
+            Option::None => main_app.theme.text_color.clone()
+        })
+        .font(font.clone())
+        .size(main_app.theme.font_size);
+
+    let column: Column<Message<CustomMessage>> = Column::new()
+        .push(sponsored_text)
+        .push(ad_image(&metadata.ad_image))
+        .push(content_text);
+
+    let container: Container<Message<CustomMessage>> = Container::new(column)
+        .center(Length::Fill)
+        .width(AD_WIDTH)
+
+        .style(|_| -> ContainerStyle {
+            return ContainerStyle {
+                background: Option::Some(Background::Color(Color { r: 0.0, g: 0.0, b: 0.0, a: 0.4 })),
+                ..Default::default()
+            };
+        });
+
+    return Row::new()
+        .push(Space::new().width(AD_SPACING))
+        .push(container)
+        .height(AD_CONTAINER_HEIGHT)
+        .into();
+}
+
+fn ad_widget(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
+    let sidebar: Element<'_, Message<CustomMessage>> = match &main_app.ad_metadata {
+        Option::None => Space::new().into(),
+        Option::Some(metadata) => make_ad_widget(main_app, metadata)
+    };
+    return Stack::new()
+        .push(Container::new(sidebar)).into();
 }
 
 pub fn view(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
@@ -198,7 +258,7 @@ pub fn view(main_app: &MainApp) -> Element<'_, Message<CustomMessage>> {
     let main_elements: Element<'_, Message<CustomMessage>> = Container::new(
         Row::new()
         .push(Column::new().push(Space::new().width(450)).push(button_layout))
-        .push(ad_widget(&main_app.ad_metadata)),
+        .push(ad_widget(main_app)),
     )
     .padding(UI_PADDING)
     .into();

@@ -13,7 +13,7 @@ use kuecard_backend::{
     message::{Message, NavEvent},
 };
 
-use crate::{callbacks::navigate, custommessage::CustomMessage, helpers::MainApp};
+use crate::{callbacks::{navigate, try_play_sound}, custommessage::CustomMessage, helpers::MainApp};
 
 fn on_iced_keyboard_event(
     _app: &mut App,
@@ -82,10 +82,11 @@ pub fn on_iced_event(_app: &mut App, e: iced::Event) -> Task<Message<CustomMessa
     };
 }
 
-pub fn on_nav_event(_app: &mut App, ne: NavEvent) -> Task<Message<CustomMessage>> {
+pub fn on_nav_event(main_app: &mut MainApp, ne: NavEvent) -> Task<Message<CustomMessage>> {
     match ne {
         NavEvent::Navigate(dir) => {
-            let res = _app.get_multi_grid().get_internal_ref().try_borrow_mut();
+            let res = main_app.app.get_multi_grid().get_internal_ref().try_borrow_mut();
+
             if res.is_err() {
                 let e: BorrowMutError = res.err().unwrap();
                 return Task::done(Message::PrintErr(e.to_string()));
@@ -95,10 +96,14 @@ pub fn on_nav_event(_app: &mut App, ne: NavEvent) -> Task<Message<CustomMessage>
 
             ig.move_focus(dir.clone(), navigate);
 
+            let _ = try_play_sound(main_app.config.select_sfx.as_ref());
+
             return Task::none();
         }
         NavEvent::Select(pos) => {
-            let res = _app.get_multi_grid().get_internal_ref().try_borrow();
+            let _ = try_play_sound(main_app.config.select_sfx.as_ref());
+
+            let res = main_app.app.get_multi_grid().get_internal_ref().try_borrow();
 
             if res.is_err() {
                 return Task::perform(
@@ -133,7 +138,9 @@ pub fn on_nav_event(_app: &mut App, ne: NavEvent) -> Task<Message<CustomMessage>
                     return if res.is_err() {
                         Task::none()
                     } else {
-                        Task::done(Message::Custom(CustomMessage::Exit))
+                        Task::perform(async move {
+                            tokio::time::sleep(Duration::from_millis(500))
+                        }, |_| Message::Custom(CustomMessage::Exit))
                     };
                 }
                 _ => {}

@@ -2,3 +2,4 @@ kuecard-backend/target/**
 kuecard-frontend/images/**
 kuecard-frontend/target/**
 kuecard-frontend/config.json
+kuecard-frontend/select.wav

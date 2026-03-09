@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     globals::{
-        BLUR_RADIUS, 
+        BLUR_RADIUS,
         CONTAINER_SPACING
-    }, 
+    },
     helpers::{
-        Backdrop, 
+        Backdrop,
         CustomTheme
     }
 };
@@ -26,7 +26,7 @@ pub struct IcedColor {
 pub struct IcedGradient {
     pub start: IcedColor,
     pub end: IcedColor,
-    pub angle: f32
+    pub angle: f32,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -38,6 +38,7 @@ pub struct IcedShadow {
     pub offset: (f32, f32),
 
     /// The blur radius of the shadow.
+    #[serde(rename = "blurRadius")]
     pub blur_radius: f32,
 }
 
@@ -46,11 +47,21 @@ pub struct IcedShadow {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct CustomThemeData {
     pub backdrop: IcedGradient,
+    #[serde(rename = "buttonBackdrop")]
     pub button_backdrop: IcedGradient,
+    #[serde(rename = "textColor")]
     pub text_color: IcedColor,
+    #[serde(rename = "sponsoredTextColor")]
+    pub sponsored_text_color: Option<IcedColor>,
+    #[serde(rename = "unselectedColor")]
     pub unselected_color: IcedColor,
+    #[serde(rename = "selectedColor")]
     pub selected_color: IcedColor,
-    pub shadow: IcedShadow
+    pub shadow: IcedShadow,
+    #[serde(rename = "fontName")]
+    pub font_name: Option<String>,
+    #[serde(rename = "fontSize")]
+    pub font_size: Option<u32>
 }
 
 impl Default for CustomThemeData {
@@ -72,6 +83,7 @@ impl Default for CustomThemeData {
                 b: 1.0,
                 a: 1.0
             },
+            sponsored_text_color: Option::None,
             unselected_color: IcedColor {
                 r: 0.2, g: 0.2, b: 0.2, a: 1.0
             },
@@ -90,7 +102,9 @@ impl Default for CustomThemeData {
                 },
                 offset: (0.0, 0.0),
                 blur_radius: BLUR_RADIUS + CONTAINER_SPACING * 1.5
-            }
+            },
+            font_name: Option::None,
+            font_size: Option::None
         };
     }
 }
@@ -114,7 +128,7 @@ impl Into<CustomTheme> for CustomThemeData {
                         a: self.backdrop.end.a,
                     })
                 )
-            ), 
+            ),
             button_backdrop: Backdrop::gradient(
                 iced::Gradient::Linear(
                     Linear::new(self.button_backdrop.angle)
@@ -131,25 +145,26 @@ impl Into<CustomTheme> for CustomThemeData {
                         a: self.button_backdrop.end.a,
                     })
                 )
-            ), 
+            ),
             text_color: Color {
                 r: self.text_color.r,
                 g: self.text_color.g,
                 b: self.text_color.b,
                 a: self.text_color.a
-            }, 
+            },
+            sponsored_text_color: into_iced_color(self.sponsored_text_color),
             unselected_color: Color {
                 r: self.unselected_color.r,
                 g: self.unselected_color.g,
                 b: self.unselected_color.b,
                 a: self.unselected_color.a
-            }, 
+            },
             selected_color: Color {
                 r: self.selected_color.r,
                 g: self.selected_color.g,
                 b: self.selected_color.b,
                 a: self.selected_color.a
-            }, 
+            },
             shadow: Shadow {
                 color: Color {
                     r: self.shadow.color.r,
@@ -158,11 +173,25 @@ impl Into<CustomTheme> for CustomThemeData {
                     a: self.shadow.color.a
                 },
                 offset: Vector::new(
-                    self.shadow.offset.0, 
+                    self.shadow.offset.0,
                     self.shadow.offset.1
                 ),
                 blur_radius: self.shadow.blur_radius
-            } 
+            },
+            font_name: self.font_name,
+            font_size: self.font_size.unwrap_or(26)
         };
     }
+}
+
+fn into_iced_color(color: Option<IcedColor>) -> Option<iced::Color> {
+    return match color {
+        Option::Some(c) => Option::Some(iced::Color {
+            r: c.r,
+            g: c.g,
+            b: c.b,
+            a: c.a
+        }),
+        Option::None => Option::None
+    };
 }

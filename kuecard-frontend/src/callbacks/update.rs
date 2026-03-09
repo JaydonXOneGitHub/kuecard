@@ -16,7 +16,7 @@ pub fn update(
 ) -> Task<Message<CustomMessage>> {
     let task: Task<Message<CustomMessage>> = match _msg {
         Message::IcedEvent(e) => on_iced_event(&mut main_app.app, e),
-        Message::NavEvent(ne) => on_nav_event(&mut main_app.app, ne),
+        Message::NavEvent(ne) => on_nav_event(main_app, ne),
         Message::PrintErr(err) => {
             eprintln!("Error: {}", err);
             Task::none()
